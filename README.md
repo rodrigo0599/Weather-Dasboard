@@ -18,6 +18,8 @@ N/A
 
 ## Usage
 
+You can access the website here: https://rodrigo0599-weather-dasboard.netlify.app/
+
 Provide instructions on how to use the website.
 
 1. Open the website in your browser.
