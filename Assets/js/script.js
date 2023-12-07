@@ -1,144 +1,126 @@
-let isNew = false;
+let isFreshSearch = false;
 
 $("#searchBtn").on("click", () => {
-  let cityVal = $("input").val();
+  let inputValue = $("input").val();
 
-  isNew = true;
+  isFreshSearch = true;
 
-  whoYouGonnaCall(cityVal);
+  initiateSearch(inputValue);
 
   $("input").val("");
 });
 
 $("#city-list").on("click", (event) => {
   if (event.target.matches("button")) {
-    let cityVal = event.target.textContent;
+    let inputValue = event.target.textContent;
 
-    isNew = false;
-    whoYouGonnaCall(cityVal);
+    isFreshSearch = false;
+    initiateSearch(inputValue);
   }
 });
 
-function cityListPopulator(cityVal) {
-  let alreadyMade = false;
+function updateCityList(inputValue) {
+  let isCityExisting = false;
 
-  localStorage.setItem("lastCity", cityVal);
+  localStorage.setItem("lastCity", inputValue);
   $(".cityListBtn").each(function () {
-    if (cityVal === $(this).text()) {
-      console.log("inside");
-      alreadyMade = true;
-      return alreadyMade;
+    if (inputValue === $(this).text()) {
+      console.log("City already in the list");
+      isCityExisting = true;
+      return isCityExisting;
     }
   });
-  if (!alreadyMade) {
-    let cityEL = $("<button>");
-    cityEL.text(cityVal);
-    cityEL.attr("class", "btn btn-block cityListBtn");
-    cityEL.attr("data-city", cityVal);
-    $("#city-list").prepend(cityEL);
+  if (!isCityExisting) {
+    let newCityButton = $("<button>");
+    newCityButton.text(inputValue);
+    newCityButton.attr("class", "btn btn-block cityListBtn");
+    newCityButton.attr("data-city", inputValue);
+    $("#city-list").prepend(newCityButton);
   }
 }
 
-function whoYouGonnaCall(cityVal) {
-  let apiKey = "46c83042b2cdf276d685079cb38dbf65";
+async function initiateSearch(inputValue) {
+  const weatherApiKey = "46c83042b2cdf276d685079cb38dbf65";
+  const baseUrl = "https://api.openweathermap.org/data/2.5";
 
-  let apiUrl =
-    "https://api.openweathermap.org/data/2.5/weather?q=" +
-    cityVal +
-    "&units=imperial&appid=" +
-    apiKey;
+  try {
+    const weatherResponse = await fetch(
+      `${baseUrl}/weather?q=${inputValue}&units=imperial&appid=${weatherApiKey}`
+    );
+    if (!weatherResponse.ok) throw new Error("Weather data not found.");
 
-  $.ajax({
-    url: apiUrl,
-    method: "GET",
-  })
-    .then((response) => {
-      let cityName = response.name;
+    const weatherData = await weatherResponse.json();
+    const { name: retrievedCityName, weather, main, wind, coord } = weatherData;
 
-      if (isNew) {
-        cityListPopulator(cityName);
-      }
+    if (isFreshSearch) {
+      updateCityList(retrievedCityName);
+    }
 
-      $(".fiveDayForecast").remove();
+    $(".fiveDayForecast").empty();
+    $("#cityNameDate").text(`${retrievedCityName} ${moment().format("L")}`);
+    $("#cityNameDate").append(
+      $("<img>").attr(
+        "src",
+        `https://openweathermap.org/img/wn/${weather[0].icon}@2x.png`
+      )
+    );
+    $("#temp").html(`Temperature: ${main.temp}&#176F`);
+    $("#humidity").text(`${main.humidity}%`);
+    $("#windSpeed").text(`${wind.speed} MPH`);
 
-      $("#cityNameDate").text(cityName + " " + moment().format("L"));
-      $("#cityNameDate").append(
-        $("<img>").attr(
-          "src",
-          "https://openweathermap.org/img/wn/" +
-            response.weather[0].icon +
-            "@2x.png"
-        )
-      );
-      $("#temp").html("Temperature: " + response.main.temp + "9&#176" + "F");
-      $("#humidity").text(response.main.humidity + "%");
-      $("#windSpeed").text(response.wind.speed + " MPH");
+    const uvResponse = await fetch(
+      `${baseUrl}/uvi?lat=${coord.lat}&lon=${coord.lon}&appid=${weatherApiKey}`
+    );
+    if (uvResponse.ok) {
+      const uvData = await uvResponse.json();
+      const uvi = uvData.value;
+      $("#uv").text("UV Index: ");
+      $("#uv").append($("<div>").addClass(getUVIndexClass(uvi)).text(uvi));
+    }
 
-      let lon = response.coord.lon;
-      let lat = response.coord.lat;
-      $.ajax({
-        url:
-          "https://api.openweathermap.org/data/2.5/uvi?lat=" +
-          lat +
-          "&lon=" +
-          lon +
-          "&appid=" +
-          apiKey,
-        method: "GET",
-      }).then((response) => {
-        let uvi = response.value;
-        $("#uv").text("UV Index: ");
-        if (uvi < 3) {
-          $("#uv").append($("<div>").attr("class", "low").text(uvi));
-        } else if (uvi < 6) {
-          $("#uv").append($("<div>").attr("class", "moderate").text(uvi));
-        } else if (uvi < 8) {
-          $("#uv").append($("<div>").attr("class", "high").text(uvi));
-        } else {
-          $("#uv").append($("<div>").attr("class", "veryHigh").text(uvi));
-        }
-      });
-
-      $.ajax({
-        url:
-          "https://api.openweathermap.org/data/2.5/onecall?lat=" +
-          lat +
-          "&lon=" +
-          lon +
-          "&units=imperial&exclude=current,minutely,hourly,alerts&appid=" +
-          apiKey,
-        method: "GET",
-      }).then((response) => {
-        let dailyForecastArr = response.daily;
-        for (let i = 1; i < 6; i++) {
-          let forecastDiv = $("<div>").attr("class", "fiveDayForecast");
-          let date = String(moment().add(i, "day").format("L"));
-
-          forecastDiv.prepend($("<p>").text(date));
-          forecastDiv.append(
-            $("<img>").attr(
-              "src",
-              "https://openweathermap.org/img/wn/" +
-                dailyForecastArr[i].weather[0].icon +
-                "@2x.png"
-            )
-          );
-          forecastDiv.append(
-            $("<p>").html(
-              "Temp: " + dailyForecastArr[i].temp.day + "9&#176" + "F"
-            )
-          );
-          forecastDiv.append(
-            $("<p>").text("Humidity: " + dailyForecastArr[i].humidity + "%")
-          );
-          $("#fiveDay").append(forecastDiv);
-        }
-      });
-    })
-    .catch(() => {
-      alert("Not a valid city, Please check the spelling and try again.");
-    });
+    const forecastResponse = await fetch(
+      `${baseUrl}/onecall?lat=${coord.lat}&lon=${coord.lon}&units=imperial&exclude=current,minutely,hourly,alerts&appid=${weatherApiKey}`
+    );
+    if (forecastResponse.ok) {
+      const forecastData = await forecastResponse.json();
+      updateFiveDayForecast(forecastData.daily);
+    }
+  } catch (error) {
+    alert(
+      "City name not recognized. Please verify the spelling and try again."
+    );
+  }
 }
 
-whoYouGonnaCall(localStorage.getItem("lastCity"));
-cityListPopulator(localStorage.getItem("lastCity"));
+function getUVIndexClass(uvi) {
+  if (uvi < 3) return "low";
+  if (uvi < 6) return "moderate";
+  if (uvi < 8) return "high";
+  return "veryHigh";
+}
+
+function updateFiveDayForecast(dailyForecastArr) {
+  for (let i = 1; i < 6; i++) {
+    const forecastDiv = $("<div>").addClass("fiveDayForecast");
+    const date = moment().add(i, "days").format("L");
+
+    forecastDiv.prepend($("<p>").text(date));
+    forecastDiv.append(
+      $("<img>").attr(
+        "src",
+        `https://openweathermap.org/img/wn/${dailyForecastArr[i].weather[0].icon}@2x.png`
+      )
+    );
+    forecastDiv.append(
+      $("<p>").html(`Temp: ${dailyForecastArr[i].temp.day}&#176F`)
+    );
+    forecastDiv.append(
+      $("<p>").text(`Humidity: ${dailyForecastArr[i].humidity}%`)
+    );
+    $("#fiveDay").append(forecastDiv);
+  }
+}
+
+initiateSearch(localStorage.getItem("lastCity"));
+updateCityList(localStorage.getItem("lastCity"));
+

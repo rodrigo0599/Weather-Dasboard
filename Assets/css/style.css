@@ -1,24 +1,38 @@
-/* City List Styling */
 .city-list {
-  border-radius: 5px;
-  border: 40px double black;
+  border-radius: 10px;
+  border: 3px solid #4a4e69; /* Dark grey border for sophistication */
   height: 600px;
-  background-color: chartreuse;
+  background: linear-gradient(145deg, #e9edc9, #fdfd96); /* Gradient for a fresh look */
   padding: 20px;
-  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
-  overflow: auto;
+  box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.3);
+  overflow-y: auto;
+  transition: all 0.3s ease; /* Smooth transition for hover effects */
 }
 
+.city-list:hover {
+  transform: scale(1.02); /* Slight scale on hover for an interactive feel */
+}
 
-/* Container for City Searches */
+/* Container for City Searches - Clean and Spacious */
 #city-container {
   height: 100%;
   padding: 20px;
+  background-color: #f7f7f7; /* Light background for contrast */
 }
-.cityListBtn:hover, .cityListBtn:active {
-  background-color: #D4E2F0;
-  box-shadow: 0 4px 6px rgba(0, 123, 255, 0.5);
+.cityListBtn {
+  background-color: #9ad3bc; /* Calm teal background */
+  color: black; /* White text for readability */
+  border: none;
+  border-radius: 5px;
+  padding: 10px 15px;
+  margin: 5px;
+  transition: all 0.3s ease;
 }
+.cityListBtn:hover, .cityListBtn:focus {
+  background-color: #89bfab; /* Darker shade on hover/focus */
+  box-shadow: 0 5px 10px rgba(0, 123, 255, 0.4);
+}
+
 
 
 /* Forecast Button Styling */
@@ -29,7 +43,7 @@
 }
 
 #btnForecast:hover {
-  background-color: #ddd;
+  background-color: #e76f51;
 }
 
 #btnForecast:active {
@@ -41,53 +55,47 @@
 .low, .moderate, .high, .veryHigh {
   height: 25px;
   width: 40px;
+  line-height: 25px;
   text-align: center;
   display: inline-block;
-  border: 1px solid #ddd;
-  padding: 5px;
+  border-radius: 12px;
+  font-weight: bold;
   margin: 2px;
 }
 
 
-.low {
-  background-color: green;
-}
-
-.moderate {
-  background-color: yellow;
-}
-
-.high {
-  background-color: orange;
-}
-
-.veryHigh {
-  background-color: red;
-}
+.low { background-color: #2a9d8f; }
+.moderate { background-color: #e9c46a; }
+.high { background-color: #f4a261; }
+.veryHigh { background-color: #e76f51; }
 
 /* Five Day Forecast Styling */
 .fiveDayForecast {
-  background-color: blue;
-  color: white;
+  background-color: #264653;
+  color: #e9c46a;
   float: left;
-  border-radius: 5px;
+  border-radius: 8px;
   margin-right: 10px;
   margin-bottom: 10px;
-  width: 18%;
+  width: calc(20% - 20px);;
   min-width: 150px;
   transition: transform 0.3s ease;
 }
 
 .fiveDayForecast:hover {
-  transform: scale(1.05);
+  transform: translateY(-10px); /* Lift effect on hover */
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
 }
 
 
 @media screen and (max-width: 600px) {
   .fiveDayForecast {
     width: 100%;
-    min-width: auto;
-    margin-right: 0;
-    margin-bottom: 10px;
+    margin: 10px 0;
+  }
+
+  .city-list {
+    border: 2px solid #4a4e69;
+    padding: 10px;
   }
 }

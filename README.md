@@ -26,7 +26,7 @@ Provide instructions on how to use the website.
 2. Enter a city name in the search bar and click the search button.
 3. View the current weather and forecast.
 
-![Webpage Screenshot](./Assets/images/Weather.png)
+![Webpage Screenshot](./Assets/images/Weather2.png)
 
 # License:
 
